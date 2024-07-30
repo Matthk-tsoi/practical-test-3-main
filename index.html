@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Popular Movies</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"
+      defer
+    ></script>
+    <script src="/index.js"></script>
+  </head>
+
+  <body x-data="movieApp()" x-init="init()">
+    <header data-aos="fade-down" data-aos-duration="1500" class="page-header">
+      <div class="container">
+        <h1 class="page-title">MOVIE<span>TIME</span></h1>
+
+        <div class="menu">
+          <nav>
+            <ul>
+              <li>
+                <a
+                  :class="{ active: activeSection === 'hero-section' }"
+                  @click="scrollToSection('hero-section')"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a
+                  :class="{ active: activeSection === 'featured-section' }"
+                  @click="scrollToSection('featured-section')"
+                  >Feature</a
+                >
+              </li>
+              <li><a class="menu-item">Download</a></li>
+              <li><a class="menu-item">LiveTv</a></li>
+            </ul>
+          </nav>
+
+          <div class="menu-button">
+            <a @click="toggleMobileMenu" class="mobile-button">
+              <svg
+                width="26"
+                height="18"
+                viewBox="0 0 26 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M1 1H25"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1 9H25"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1 17H25"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </a>
+
+            <a class="search-button">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.5 19C15.1944 19 19 15.1944 19 10.5C19 5.8056 15.1944 2 10.5 2C5.8056 2 2 5.8056 2 10.5C2 15.1944 5.8056 19 10.5 19Z"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M16.6108 16.6108L20.8534 20.8535"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section data-aos="zoom-out" data-aos-duration="1500" id="hero-section">
+      <div class="container">
+        <div data-aos="fade-right" data-aos-duration="1500">
+          <h1 class="hero-title">
+            Unleash the Magic,<br /><span>Cinema and Storytelling.</span>
+          </h1>
+          <p>
+            Discover, stream, and experience the best in film
+            <br />
+            from classics to latest blockbusters.
+          </p>
+
+          <button>Watch Now</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="featured-section" data-aos="fade-up" data-aos-duration="1500">
+      <div class="container">
+        <div class="featured-header">
+          <h1 class="featured-title">FEATURED<span>TODAY</span></h1>
+          <button class="sortby-btn" @click="sortByPopularity">
+            <svg
+              width="15"
+              height="16"
+              viewBox="0 0 15 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13.069 1H2.20377C1.34461 1 0.88543 2.01192 1.45119 2.6585L5.69197 7.50511C5.85148 7.6874 5.93939 7.92139 5.93939 8.16361V12.2045C5.93939 12.3619 6.01349 12.5101 6.13939 12.6045L8.53333 14.4C8.86295 14.6472 9.33333 14.412 9.33333 14V8.16361C9.33333 7.92139 9.42125 7.6874 9.58076 7.50511L13.8215 2.6585C14.3873 2.01192 13.9281 1 13.069 1Z"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>Sort by Popularity</span>
+          </button>
+        </div>
+
+        <div class="loading">
+          <template x-if="loading">
+            <span class="loader"></span>
+          </template>
+        </div>
+
+        <div id="movies">
+          <template x-if="!loading && error">
+            <p>Error loading movies. Please try again later.</p>
+          </template>
+          <template x-for="movie in movies.slice(0, 8)" :key="movie.id">
+            <div class="movie">
+              <div class="image-container">
+                <img
+                  x-bind:src="'https://image.tmdb.org/t/p/w200/' + movie.poster_path"
+                  alt="Movie Poster"
+                  class="movie-poster"
+                />
+                <div class="poster-overlay"></div>
+              </div>
+
+              <div class="movie-info">
+                <h5 x-text="movie.title"></h5>
+                <p x-text="movie.overview"></p>
+                <div class="movie-popularity">
+                  <svg
+                    width="18"
+                    height="22"
+                    viewBox="0 0 18 22"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M11.545 12.0375C12.4337 11.6045 13.1097 10.9734 13.6261 10.1736C14.0363 9.53511 14.2642 8.83796 14.3249 8.0821C14.3401 7.8913 14.3629 7.70784 14.3705 7.51704C14.3705 7.25285 14.5072 7.07673 14.7503 6.96666C15.0161 6.85658 15.2516 6.92262 15.4415 7.12076C15.7149 7.40696 15.9807 7.7005 16.2162 8.01605C17.0897 9.16819 17.6593 10.4524 17.8796 11.8687C18.2746 14.4078 17.6821 16.7121 16.0263 18.7228C14.6439 20.4033 12.8362 21.4381 10.6487 21.8417C10.0335 21.9518 9.41066 22.0178 8.78024 21.9958C6.8358 21.9297 5.08124 21.35 3.53936 20.1979C1.89115 18.9723 0.812591 17.3799 0.288503 15.4352C0.0378528 14.5619 -0.0153155 13.674 -0.000124581 12.786C0.0302573 10.9221 0.660681 9.26359 1.88355 7.83993C2.36207 7.28221 2.93932 6.79053 3.4862 6.29152C4.19257 5.64574 4.95212 5.05132 5.59014 4.33949C6.22056 3.635 6.72946 2.86447 6.98771 1.96184C7.10923 1.53621 7.1624 1.0959 7.17759 0.655595C7.18519 0.384073 7.28393 0.185935 7.53458 0.0611815C7.79283 -0.063572 8.02069 0.0171509 8.24096 0.171258C9.69929 1.21332 10.8082 2.5269 11.545 4.13402C11.9779 5.08068 12.2514 6.07136 12.3653 7.09875C12.54 8.7132 12.2969 10.2763 11.6589 11.788C11.6209 11.8761 11.583 11.9641 11.5526 12.0595L11.545 12.0375Z"
+                      fill="#3A86FF"
+                    />
+                  </svg>
+                  <span x-text="Math.round(movie.popularity)"></span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- <div class="pagination">
+        <button @click="prevPage" :disabled="page === 1"><</button>
+        <button @click="nextPage">></button>
+      </div> -->
+      </div>
+    </section>
+
+    <div id="mobile-menu" :class="{ 'open': isOpen }">
+      <a @click="toggleMobileMenu">
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 19 19"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M1 1L17.9706 17.9706"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <path
+            d="M1 17.9706L17.9706 1.00002"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </a>
+
+      <ul>
+        <li>
+          <a
+            :class="{ active: activeSection === 'hero-section' }"
+            @click="scrollToSection('hero-section')"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a
+            :class="{ active: activeSection === 'featured-section' }"
+            @click="scrollToSection('featured-section')"
+            >Feature</a
+          >
+        </li>
+        <li><a class="menu-item">Download</a></li>
+        <li><a class="menu-item">LiveTv</a></li>
+      </ul>
+    </div>
+
+    <div
+      x-show="isOpen"
+      x-transition.opacity
+      class="menu-overlay"
+      @click="toggleMobileMenu"
+    ></div>
+  </body>
+</html>
